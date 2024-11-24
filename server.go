@@ -240,6 +240,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 							})
 						}
 					case socket_protocol.CONNECT.String():
+						socket_nps := &socket
 						if namespace != "/" {
 							socketWithNamespace := Socket{
 								Id:   socket.Id,
@@ -250,47 +251,40 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 								},
 								pingTime: s.pingInterval,
 							}
-							socket.dispose = append(socket.dispose, func() {
-								s.Of(namespace).sockets.delete(socket.Id)
-								for _, callback := range socketWithNamespace.listeners.get("disconnect") {
-									callback(&EventPayload{
-										SID:    socketWithNamespace.Id,
-										Name:   "disconnect",
-										Socket: &socketWithNamespace,
-										Error:  nil,
-										Data:   []interface{}{},
-									})
-								}
-							})
-							s.Of(namespace).sockets.set(&socketWithNamespace)
-						} else {
-							socket.dispose = append(socket.dispose, func() {
-								s.Of("/").sockets.delete(socket.Id)
-								for _, callback := range socket.listeners.get("disconnect") {
-									callback(&EventPayload{
-										SID:    socket.Id,
-										Name:   "disconnect",
-										Socket: &socket,
-										Error:  nil,
-										Data:   []interface{}{},
-									})
-								}
-							})
-							s.Of("/").sockets.set(&socket)
+							socket_nps = &socketWithNamespace
+
+							if nps := s.namespaces.get(namespace); nps == nil {
+								socket_nps.writer(socket_protocol.CONNECT_ERROR, map[string]interface{}{
+									"message": "Invalid namespace",
+								})
+								continue
+							}
 						}
 
 						if s.onAuthorization != nil {
 							dataJson := map[string]string{}
 							json.Unmarshal([]byte(rawpayload), &dataJson)
 							if !s.onAuthorization(dataJson) {
-								return
+								socket_nps.writer(socket_protocol.CONNECT_ERROR, map[string]interface{}{
+									"message": "Not authorized",
+								})
+								continue
 							}
 						}
 
-						socket_nps, err := s.Of(namespace).sockets.get(socket.Id)
-						if err != nil {
-							return
-						}
+						socket.dispose = append(socket.dispose, func() {
+							s.Of(namespace).sockets.delete(socket_nps.Id)
+							for _, callback := range socket_nps.listeners.get("disconnect") {
+								callback(&EventPayload{
+									SID:    socket_nps.Id,
+									Name:   "disconnect",
+									Socket: socket_nps,
+									Error:  nil,
+									Data:   []interface{}{},
+								})
+							}
+						})
+						s.Of(namespace).sockets.set(socket_nps)
 
 						socket_nps.writer(socket_protocol.CONNECT, engineio.ConnParameters{
 							SID: socket.Id,

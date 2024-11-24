@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	socketio "github.com/doquangtan/gofiber-socket.io"
@@ -21,6 +21,10 @@ func socketIoRoute(app fiber.Router) {
 
 		socket.On("test", func(event *socketio.EventPayload) {
 			socket.Emit("test", event.Data...)
+		})
+
+		socket.On("close", func(event *socketio.EventPayload) {
+			socket.Disconnect()
 		})
 
 		socket.On("disconnecting", func(event *socketio.EventPayload) {
