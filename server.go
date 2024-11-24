@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/doquangtan/gofiber-socket.io/engineio"
+	"github.com/doquangtan/gofiber-socket.io/socket_protocol"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
-	"muop.shop/erp/socketio/engineio"
-	"muop.shop/erp/socketio/socket_protocol"
 )
 
 type payload struct {

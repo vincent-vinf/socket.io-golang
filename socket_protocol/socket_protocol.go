@@ -5,7 +5,7 @@ import (
 	"io"
 	"strconv"
 
-	"muop.shop/erp/socketio/engineio"
+	"github.com/doquangtan/gofiber-socket.io/engineio"
 )
 
 type PacketType int

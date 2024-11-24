@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/doquangtan/gofiber-socket.io/engineio"
+	"github.com/doquangtan/gofiber-socket.io/socket_protocol"
 	"github.com/gofiber/websocket/v2"
-	"muop.shop/erp/socketio/engineio"
-	"muop.shop/erp/socketio/socket_protocol"
 )
 
 type Socket struct {
