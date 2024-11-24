@@ -45,5 +45,19 @@ func main() {
 
 	app.Route("/", socketIoRoute)
 
+	app.Get("/test", func(c *fiber.Ctx) error {
+		io := c.Locals("io").(*socketio.Io)
+
+		io.Emit("event", map[string]interface{}{
+			"Ok": 1,
+		})
+
+		io.Of("/admin").Emit("event", map[string]interface{}{
+			"Ok": 1,
+		})
+
+		return c.SendStatus(200)
+	})
+
 	app.Listen(":3000")
 }
