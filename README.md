@@ -2,7 +2,7 @@
 
 - gofiber-socket.io is library an implementation of [Socket.IO](http://socket.io) in Golang, which is a realtime application framework.
 - It using with web-framework [Go Fiber](https://gofiber.io)
-- This library support socket.io version 3, 4 and only support websocket transport
+- This library support socket.io-client version 3, 4 and only support websocket transport
 
 ## Contents
 
