@@ -18,21 +18,34 @@ func socketIoRoute(app fiber.Router) {
 
 	io.OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
+		socket.Join("demo")
+		io.To("demo").Emit("hello", socket.Id+" join us room...", "server message")
 
 		socket.On("test", func(event *socketio.EventPayload) {
 			socket.Emit("test", event.Data...)
 		})
 
-		socket.On("close", func(event *socketio.EventPayload) {
-			socket.Disconnect()
+		socket.On("join-room", func(event *socketio.EventPayload) {
+			if len(event.Data) > 0 && event.Data[0] != nil {
+				socket.Join(event.Data[0].(string))
+			}
+		})
+
+		socket.On("leave-room", func(event *socketio.EventPayload) {
+			socket.Leave("demo")
+			io.To("demo").Emit("hello", socket.Id+" leave us room...", "server message")
+		})
+
+		socket.On("room-emit", func(event *socketio.EventPayload) {
+			socket.To("demo").Emit("hello", socket.Id, event.Data)
 		})
 
 		socket.On("disconnecting", func(event *socketio.EventPayload) {
-			println(event.SID, "disconnecting")
+			println("disconnecting", socket.Nps, socket.Id)
 		})
 
 		socket.On("disconnect", func(event *socketio.EventPayload) {
-			println(event.SID, "disconnect")
+			println("disconnect", socket.Nps, socket.Id)
 		})
 	})
 

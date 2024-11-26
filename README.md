@@ -30,7 +30,7 @@ and use `socketio` as the package name inside the code.
 Please check more examples into folder in project for details. [Examples](https://github.com/doquangtan/gofiber-socket.io/tree/main/example)
 
 ```go
-package example
+package main
 
 import (
 	socketio "github.com/doquangtan/gofiber-socket.io"
@@ -50,17 +50,34 @@ func socketIoRoute(app fiber.Router) {
 
 	io.OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
+		socket.Join("demo")
+		io.To("demo").Emit("hello", socket.Id+" join us room...", "server message")
 
 		socket.On("test", func(event *socketio.EventPayload) {
 			socket.Emit("test", event.Data...)
 		})
 
+		socket.On("join-room", func(event *socketio.EventPayload) {
+			if len(event.Data) > 0 && event.Data[0] != nil {
+				socket.Join(event.Data[0].(string))
+			}
+		})
+
+		socket.On("leave-room", func(event *socketio.EventPayload) {
+			socket.Leave("demo")
+			io.To("demo").Emit("hello", socket.Id+" leave us room...", "server message")
+		})
+
+		socket.On("room-emit", func(event *socketio.EventPayload) {
+			socket.To("demo").Emit("hello", socket.Id, event.Data)
+		})
+
 		socket.On("disconnecting", func(event *socketio.EventPayload) {
-			println(event.SID, "disconnecting")
+			println("disconnecting", socket.Nps, socket.Id)
 		})
 
 		socket.On("disconnect", func(event *socketio.EventPayload) {
-			println(event.SID, "disconnect")
+			println("disconnect", socket.Nps, socket.Id)
 		})
 	})
 
@@ -93,4 +110,5 @@ func main() {
 
 	app.Listen(":3000")
 }
+
 ```

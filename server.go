@@ -83,11 +83,11 @@ func (s *Io) Close() {
 }
 
 func (s *Io) Of(name string) *Namespace {
-	nps := s.namespaces.get(name)
-	if nps == nil {
-		nps = s.namespaces.create(name)
-	}
-	return nps
+	return s.namespaces.create(name)
+}
+
+func (s *Io) To(name string) *Room {
+	return s.Of("/").To(name)
 }
 
 func (s *Io) OnConnection(fn connectionEventCallback) {
@@ -273,6 +273,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 						}
 
 						socket.dispose = append(socket.dispose, func() {
+							s.Of(namespace).socketLeaveAllRooms(socket_nps)
 							s.Of(namespace).sockets.delete(socket_nps.Id)
 							for _, callback := range socket_nps.listeners.get("disconnect") {
 								callback(&EventPayload{
@@ -285,6 +286,15 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 							}
 						})
 						s.Of(namespace).sockets.set(socket_nps)
+						socket_nps.Join = func(room string) {
+							s.Of(namespace).socketJoinRoom(room, socket_nps)
+						}
+						socket_nps.Leave = func(room string) {
+							s.Of(namespace).socketLeaveRoom(room, socket_nps)
+						}
+						socket_nps.To = func(room string) *Room {
+							return s.Of(namespace).To(room)
+						}
 
 						socket_nps.writer(socket_protocol.CONNECT, engineio.ConnParameters{
 							SID: socket.Id,
