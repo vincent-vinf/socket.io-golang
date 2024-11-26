@@ -13,10 +13,13 @@ type Socket struct {
 	Id        string
 	Nps       string
 	Conn      *websocket.Conn
-	rooms     []string
+	rooms     roomNames
 	listeners listeners
 	pingTime  time.Duration
 	dispose   []func()
+	Join      func(room string)
+	Leave     func(room string)
+	To        func(room string) *Room
 }
 
 func (s *Socket) On(event string, fn eventCallback) {
@@ -58,7 +61,7 @@ func (s *Socket) Disconnect() error {
 func (s *Socket) disconnect() {
 	s.Conn.Close()
 	s.Conn = nil
-	s.rooms = []string{}
+	// s.rooms = []string{}
 	if len(s.dispose) > 0 {
 		for _, dispose := range s.dispose {
 			dispose()
