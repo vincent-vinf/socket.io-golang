@@ -90,6 +90,10 @@ func (s *Io) To(name string) *Room {
 	return s.Of("/").To(name)
 }
 
+func (s *Io) Sockets(name string) []*Socket {
+	return s.Of("/").Sockets()
+}
+
 func (s *Io) OnConnection(fn connectionEventCallback) {
 	s.Of("/").onConnection.set("connection", fn)
 }
