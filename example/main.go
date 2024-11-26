@@ -19,7 +19,7 @@ func socketIoRoute(app fiber.Router) {
 	io.OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
 		socket.Join("demo")
-		io.To("demo").Emit("hello", socket.Id+" join us room...", "server message")
+		io.To("demo").Emit("test", socket.Id+" join us room...", "server message")
 
 		socket.On("test", func(event *socketio.EventPayload) {
 			socket.Emit("test", event.Data...)
@@ -31,13 +31,17 @@ func socketIoRoute(app fiber.Router) {
 			}
 		})
 
-		socket.On("leave-room", func(event *socketio.EventPayload) {
-			socket.Leave("demo")
-			io.To("demo").Emit("hello", socket.Id+" leave us room...", "server message")
+		socket.On("to-room", func(event *socketio.EventPayload) {
+			socket.To("demo").To("demo2").Emit("test", "hello")
 		})
 
-		socket.On("room-emit", func(event *socketio.EventPayload) {
-			socket.To("demo").Emit("hello", socket.Id, event.Data)
+		socket.On("leave-room", func(event *socketio.EventPayload) {
+			socket.Leave("demo")
+			socket.Join("demo2")
+		})
+
+		socket.On("my-room", func(event *socketio.EventPayload) {
+			socket.Emit("my-room", socket.Rooms())
 		})
 
 		socket.On("disconnecting", func(event *socketio.EventPayload) {

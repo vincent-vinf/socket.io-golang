@@ -58,6 +58,10 @@ func (s *Socket) Disconnect() error {
 	return s.Conn.SetReadDeadline(time.Now())
 }
 
+func (s *Socket) Rooms() []string {
+	return s.rooms.all()
+}
+
 func (s *Socket) disconnect() {
 	s.Conn.Close()
 	s.Conn = nil

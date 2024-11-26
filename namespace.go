@@ -5,7 +5,7 @@ import (
 )
 
 type Namespace struct {
-	name         string
+	Name         string
 	sockets      *connections
 	rooms        *rooms
 	onConnection connectionEvent
@@ -13,7 +13,7 @@ type Namespace struct {
 
 func newNamespace(name string) *Namespace {
 	return &Namespace{
-		name: name,
+		Name: name,
 		sockets: &connections{
 			conn: make(map[string]*Socket),
 		},
@@ -55,7 +55,11 @@ func (nps *Namespace) socketLeaveAllRooms(socket *Socket) {
 }
 
 func (nps *Namespace) To(room string) *Room {
-	return nps.rooms.create(room)
+	return nps.rooms.next(room)
+}
+
+func (nps *Namespace) Sockets() []*Socket {
+	return nps.sockets.all()
 }
 
 type namespaces struct {
