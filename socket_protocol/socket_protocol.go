@@ -27,12 +27,13 @@ func (id PacketType) String() string {
 type writer struct {
 	t   PacketType
 	nps string
+	ack string
 	i   int64
 	w   io.Writer
 }
 
 func (w *writer) Write(p []byte) (int, error) {
-	paserData := append([]byte(w.t.String()+w.nps), p...)
+	paserData := append([]byte(w.t.String()+w.nps+w.ack), p...)
 	return engineio.WriteByte(w.w, engineio.MESSAGE, paserData)
 }
 
@@ -40,6 +41,23 @@ func WriteTo(w io.Writer, t PacketType, nps string, arg ...interface{}) (int64, 
 	writer := writer{
 		t:   t,
 		nps: nps,
+		ack: "",
+		w:   w,
+	}
+	if len(arg) > 0 {
+		err := json.NewEncoder(&writer).Encode(arg[0])
+		return writer.i, err
+	} else {
+		_, err := writer.Write([]byte{})
+		return writer.i, err
+	}
+}
+
+func WriteToWithAck(w io.Writer, t PacketType, nps string, ack string, arg ...interface{}) (int64, error) {
+	writer := writer{
+		t:   t,
+		nps: nps,
+		ack: ack,
 		w:   w,
 	}
 	if len(arg) > 0 {

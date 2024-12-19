@@ -35,6 +35,15 @@ func (s *Socket) Emit(event string, agrs ...interface{}) error {
 	return s.writer(socket_protocol.EVENT, agrs)
 }
 
+func (s *Socket) ack(ackEvent string, agrs ...interface{}) error {
+	c := s.Conn
+	if c == nil || c.Conn == nil {
+		return errors.New("socket has disconnected")
+	}
+	agrs = append([]interface{}{ackEvent}, agrs...)
+	return s.writer(socket_protocol.ACK, agrs)
+}
+
 func (s *Socket) Ping() error {
 	c := s.Conn
 	if c == nil || c.Conn == nil {
@@ -91,6 +100,11 @@ func (s *Socket) writer(t socket_protocol.PacketType, arg ...interface{}) error 
 	if s.Nps != "/" {
 		nps = s.Nps + ","
 	}
-	socket_protocol.WriteTo(w, t, nps, arg...)
+	if t == socket_protocol.ACK {
+		agrs := append([]interface{}{}, arg[0].([]interface{})[1:])
+		socket_protocol.WriteToWithAck(w, t, nps, arg[0].([]interface{})[0].(string), agrs...)
+	} else {
+		socket_protocol.WriteTo(w, t, nps, arg...)
+	}
 	return w.Close()
 }

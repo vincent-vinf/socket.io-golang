@@ -17,6 +17,7 @@ import (
 type payload struct {
 	socket *Socket
 	data   interface{}
+	ack    string
 }
 
 type Io struct {
@@ -55,6 +56,9 @@ func New() *Io {
 
 func (s *Io) Server(router fiber.Router) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
+	router.Get("/socket.io.js", func(c *fiber.Ctx) error {
+		return c.SendFile("../static/socket.io.js")
+	})
 	router.Use("/", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
@@ -115,18 +119,36 @@ func (s *Io) read(ctx context.Context) {
 			}
 			dataJson := []interface{}{}
 			json.Unmarshal([]byte(payLoad.data.(string)), &dataJson)
+
 			if len(dataJson) > 0 {
 				if reflect.TypeOf(dataJson[0]).String() == "string" {
 					event := dataJson[0].(string)
 					for _, callback := range payLoad.socket.listeners.get(event) {
 						data := append([]interface{}{}, dataJson[1:]...)
-						callback(&EventPayload{
-							SID:    payLoad.socket.Id,
-							Name:   event,
-							Socket: payLoad.socket,
-							Error:  nil,
-							Data:   data,
+
+						ackCallback := Callback(func(data ...interface{}) {
+							payLoad.socket.ack(payLoad.ack, data...)
 						})
+
+						if payLoad.ack == "" {
+							callback(&EventPayload{
+								SID:      payLoad.socket.Id,
+								Name:     event,
+								Socket:   payLoad.socket,
+								Error:    nil,
+								Data:     data,
+								Callback: nil,
+							})
+						} else {
+							callback(&EventPayload{
+								SID:      payLoad.socket.Id,
+								Name:     event,
+								Socket:   payLoad.socket,
+								Error:    nil,
+								Data:     data,
+								Callback: &ackCallback,
+							})
+						}
 					}
 				}
 			}
@@ -211,21 +233,43 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 					rawpayload := string(message[2:])
 					startNamespace := strings.Index(rawpayload, "/")
 					endNamespace := -1
+					startPayload := -1
+					ackEvent := ""
 					if startNamespace == 0 {
 						special1 := strings.Index(mess, "{")
 						special2 := strings.Index(mess, "[")
+						special3 := -1
+						nextMess := message
+						for {
+							nextSpecial3 := strings.Index(string(nextMess), ",")
+							if nextSpecial3 == -1 || (special1 != -1 && nextSpecial3 > special1) || (special2 != -1 && nextSpecial3 > special2) {
+								break
+							}
+							nextMess = nextMess[nextSpecial3+1:]
+							special3 = nextSpecial3
+						}
 						if special1 == -1 && special2 == -1 {
 							endNamespace = len(mess) - 1
-						} else if special1 > 0 && string(message[special1-1:special1]) == "," {
-							endNamespace = special1 - 1
-						} else if special2 > 0 && string(message[special2-1:special2]) == "," {
-							endNamespace = special2 - 1
+						} else if special3 != -1 {
+							endNamespace = special3
+						}
+
+						startPayload = endNamespace
+						if special1 != -1 {
+							startPayload = special1 - 1
+						} else if special2 != -1 {
+							startPayload = special2 - 1
+						}
+
+						if special3 != -1 && special2 != -1 && (special2-1 != special3) {
+							ackEvent = string(message[special3+1 : special2])
 						}
 					}
+
 					namespace := "/"
 					if endNamespace != -1 {
 						namespace = string(message[2:endNamespace])
-						rawpayload = string(message[endNamespace+1:])
+						rawpayload = string(message[startPayload+1:])
 					}
 
 					switch packetType {
@@ -316,6 +360,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 							s.readChan <- payload{
 								socket: socket_nps,
 								data:   rawpayload,
+								ack:    ackEvent,
 							}
 						}
 					}
