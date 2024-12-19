@@ -16,11 +16,14 @@ func socketIoRoute(app fiber.Router) {
 		return true
 	})
 
-	io.OnConnection(func(socket *socketio.Socket) {
+	io.Of("/test").OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
 		socket.Join("demo")
 		io.To("demo").Emit("test", socket.Id+" join us room...", "server message")
 
+		socket.On("connected", func(event *socketio.EventPayload) {
+			socket.Emit("chat message", "Main")
+		})
 		socket.On("test", func(event *socketio.EventPayload) {
 			socket.Emit("test", event.Data...)
 		})
@@ -44,6 +47,16 @@ func socketIoRoute(app fiber.Router) {
 			socket.Emit("my-room", socket.Rooms())
 		})
 
+		socket.On("chat message", func(event *socketio.EventPayload) {
+			socket.Emit("chat message", event.Data[0])
+
+			if event.Callback != nil {
+				(*event.Callback)("hello", map[string]interface{}{
+					"Test": "ok",
+				})
+			}
+		})
+
 		socket.On("disconnecting", func(event *socketio.EventPayload) {
 			println("disconnecting", socket.Nps, socket.Id)
 		})
@@ -53,7 +66,7 @@ func socketIoRoute(app fiber.Router) {
 		})
 	})
 
-	io.Of("/admin").OnConnection(func(socket *socketio.Socket) {
+	io.OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
 	})
 
@@ -63,6 +76,8 @@ func socketIoRoute(app fiber.Router) {
 
 func main() {
 	app := fiber.New(fiber.Config{})
+
+	app.Static("/", "./public")
 
 	app.Route("/", socketIoRoute)
 
