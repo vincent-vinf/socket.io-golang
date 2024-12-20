@@ -26,8 +26,9 @@ import "github.com/doquangtan/gofiber-socket.io"
 and use `socketio` as the package name inside the code.
 
 # Documents
-## Constructor
-### socketio.New
+## Server
+### Constructor
+#### socketio.New
 ```go
 import (
 	socketio "github.com/doquangtan/gofiber-socket.io"
@@ -52,16 +53,16 @@ func main() {
 }
 ```
 
-## Events
-### Event: 'connection'
+### Events
+#### Event: 'connection'
 ```go
 io.OnConnection(func(socket *socketio.Socket) {
 	// ...
 })
 ```
 
-## Methods
-### server.emit(eventName[, ...args])
+### Methods
+#### server.emit(eventName[, ...args])
 ```go
 io.Emit("hello")
 ```
@@ -69,7 +70,7 @@ io.Emit("hello")
 io.Emit("hello", 1, "2", map[string]interface{}{"3": 4})
 ```
 
-### server.of(nsp)
+#### server.of(nsp)
 ```go
 adminNamespace := io.Of("/admin")
 
@@ -78,18 +79,19 @@ adminNamespace.OnConnection(func(socket *socketio.Socket) {
 })
 ```
 
-### server.to(room)
+#### server.to(room)
 ```go
 io.To("room-101").Emit("hello", "world")
 ```
 
-### server.Sockets()
+#### server.Sockets()
 ```go
 sockets := io.Sockets()
 ```
 
 ## Socket
-### socket.on(eventName, callback)
+### Methods
+#### socket.on(eventName, callback)
 Register a new handler for the given event.
 ```go
 socket.On("news", func(event *socketio.EventPayload) {
@@ -121,7 +123,7 @@ socket.On("news", func(event *socketio.EventPayload) {
 })
 ```
 
-### socket.join(room)
+#### socket.join(room)
 Adds the socket to the given room or to the list of rooms.
 ```go
 io.Of("/test").OnConnection(func(socket *socketio.Socket) {
@@ -131,7 +133,7 @@ io.Of("/test").OnConnection(func(socket *socketio.Socket) {
 })
 ```
 
-### socket.leave(room)
+#### socket.leave(room)
 Removes the socket from the given room.
 ```go
 io.Of("/test").OnConnection(func(socket *socketio.Socket) {
@@ -142,7 +144,7 @@ io.Of("/test").OnConnection(func(socket *socketio.Socket) {
 ```
 Rooms are left automatically upon disconnection.
 
-### socket.to(room)
+#### socket.to(room)
 ```go
 socket.On("room 237", func(event *socketio.EventPayload) {
  	// to one room
