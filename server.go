@@ -56,9 +56,7 @@ func New() *Io {
 
 func (s *Io) Server(router fiber.Router) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	router.Get("/socket.io.js", func(c *fiber.Ctx) error {
-		return c.SendFile("../static/socket.io.js")
-	})
+	router.Static("/", "../client-dist")
 	router.Use("/", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)

@@ -13,7 +13,7 @@ type EventPayload struct {
 	Callback *Callback
 }
 
-type eventCallback func(payload *EventPayload)
+type eventCallback func(data *EventPayload)
 
 type listeners struct {
 	sync.RWMutex
