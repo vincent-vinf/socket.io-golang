@@ -167,8 +167,8 @@ socket.On("news", func(event *socketio.EventPayload) {
 or with acknowledgement
 ```go
 socket.On("news", func(event *socketio.EventPayload) {
-	if event.Callback != nil {
-		(*event.Callback)("hello", map[string]interface{}{
+	if event.Ack != nil {
+		event.Ack("hello", map[string]interface{}{
 			"Test": "ok",
 		})
 	}

@@ -33,9 +33,14 @@
       form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input.value) {
-          socket.emit('chat message', input.value, function (status, obj) {
+          socket.emit('chat message', input.value + " with ack", function (status, obj) {
             console.log(status, obj);
+            var item = document.createElement('li');
+            item.textContent = status;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
           });
+          socket.emit('chat message', input.value);
           input.value = '';
         }
       });

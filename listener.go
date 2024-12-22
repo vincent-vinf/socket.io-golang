@@ -2,15 +2,15 @@ package socketio
 
 import "sync"
 
-type Callback func(data ...interface{})
+type AckCallback func(data ...interface{})
 
 type EventPayload struct {
-	Name     string //event name
-	SID      string //socket id
-	Socket   *Socket
-	Error    error
-	Data     []interface{}
-	Callback *Callback
+	Name   string //event name
+	SID    string //socket id
+	Socket *Socket
+	Error  error
+	Data   []interface{}
+	Ack    AckCallback
 }
 
 type eventCallback func(data *EventPayload)
