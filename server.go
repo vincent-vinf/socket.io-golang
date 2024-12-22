@@ -17,7 +17,7 @@ import (
 type payload struct {
 	socket *Socket
 	data   interface{}
-	ack    string
+	ackId  string
 }
 
 type Io struct {
@@ -124,27 +124,27 @@ func (s *Io) read(ctx context.Context) {
 					for _, callback := range payLoad.socket.listeners.get(event) {
 						data := append([]interface{}{}, dataJson[1:]...)
 
-						ackCallback := Callback(func(data ...interface{}) {
-							payLoad.socket.ack(payLoad.ack, data...)
+						ackCallback := AckCallback(func(data ...interface{}) {
+							payLoad.socket.ack(payLoad.ackId, data...)
 						})
 
-						if payLoad.ack == "" {
+						if payLoad.ackId == "" {
 							callback(&EventPayload{
-								SID:      payLoad.socket.Id,
-								Name:     event,
-								Socket:   payLoad.socket,
-								Error:    nil,
-								Data:     data,
-								Callback: nil,
+								SID:    payLoad.socket.Id,
+								Name:   event,
+								Socket: payLoad.socket,
+								Error:  nil,
+								Data:   data,
+								Ack:    nil,
 							})
 						} else {
 							callback(&EventPayload{
-								SID:      payLoad.socket.Id,
-								Name:     event,
-								Socket:   payLoad.socket,
-								Error:    nil,
-								Data:     data,
-								Callback: &ackCallback,
+								SID:    payLoad.socket.Id,
+								Name:   event,
+								Socket: payLoad.socket,
+								Error:  nil,
+								Data:   data,
+								Ack:    ackCallback,
 							})
 						}
 					}
@@ -232,7 +232,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 					startNamespace := strings.Index(rawpayload, "/")
 					endNamespace := -1
 					startPayload := -1
-					ackEvent := ""
+					ackId := ""
 					if startNamespace == 0 {
 						special1 := strings.Index(mess, "{")
 						special2 := strings.Index(mess, "[")
@@ -260,7 +260,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 						}
 
 						if special3 != -1 && special2 != -1 && (special2-1 != special3) {
-							ackEvent = string(message[special3+1 : special2])
+							ackId = string(message[special3+1 : special2])
 						}
 					}
 
@@ -358,7 +358,7 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 							s.readChan <- payload{
 								socket: socket_nps,
 								data:   rawpayload,
-								ack:    ackEvent,
+								ackId:  ackId,
 							}
 						}
 					}

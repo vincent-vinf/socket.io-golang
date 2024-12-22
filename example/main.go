@@ -50,8 +50,8 @@ func socketIoRoute(app fiber.Router) {
 		socket.On("chat message", func(event *socketio.EventPayload) {
 			socket.Emit("chat message", event.Data[0])
 
-			if event.Callback != nil {
-				(*event.Callback)("hello", map[string]interface{}{
+			if event.Ack != nil {
+				event.Ack("hello", map[string]interface{}{
 					"Test": "ok",
 				})
 			}
