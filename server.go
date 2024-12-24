@@ -228,44 +228,48 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 					mess := string(message)
 					packetType := string(message[1:2])
 					rawpayload := string(message[2:])
-					startNamespace := strings.Index(rawpayload, "/")
+
 					endNamespace := -1
 					startPayload := -1
 					ackId := ""
-					if startNamespace == 0 {
-						special1 := strings.Index(mess, "{")
-						special2 := strings.Index(mess, "[")
-						special3 := -1
-						nextMess := message
-						for {
-							nextSpecial3 := strings.Index(string(nextMess), ",")
-							if nextSpecial3 == -1 || (special1 != -1 && nextSpecial3 > special1) || (special2 != -1 && nextSpecial3 > special2) {
-								break
-							}
-							nextMess = nextMess[nextSpecial3+1:]
-							special3 = nextSpecial3
-						}
-						if special1 == -1 && special2 == -1 {
-							endNamespace = len(mess) - 1
-						} else if special3 != -1 {
-							endNamespace = special3
-						}
 
-						startPayload = endNamespace
-						if special2 != -1 {
-							startPayload = special2 - 1
-						} else if special1 != -1 {
-							startPayload = special1 - 1
-						}
+					special1 := strings.Index(mess, "{")
+					special2 := strings.Index(mess, "[")
+					special3 := -1
+					nextMess := message
 
-						if special3 != -1 && special2 != -1 && (special2-1 != special3) {
-							ackId = string(message[special3+1 : special2])
+					for {
+						nextSpecial3 := strings.Index(string(nextMess), ",")
+						if nextSpecial3 == -1 || (special1 != -1 && nextSpecial3 > special1) || (special2 != -1 && nextSpecial3 > special2) {
+							break
 						}
+						nextMess = nextMess[nextSpecial3+1:]
+						special3 = nextSpecial3
+					}
+
+					if special3 != -1 {
+						endNamespace = special3
+					}
+
+					startPayload = endNamespace
+					if special2 != -1 {
+						startPayload = special2 - 1
+					} else if special1 != -1 {
+						startPayload = special1 - 1
+					}
+
+					if special3 != -1 && special2 != -1 && (special2-1 != special3) {
+						ackId = string(message[special3+1 : special2])
+					} else if special2 != -1 && special2 != 2 {
+						ackId = string(message[2:special2])
 					}
 
 					namespace := "/"
 					if endNamespace != -1 {
 						namespace = string(message[2:endNamespace])
+					}
+
+					if startPayload != -1 {
 						rawpayload = string(message[startPayload+1:])
 					}
 

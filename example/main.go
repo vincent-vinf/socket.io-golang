@@ -18,7 +18,7 @@ func socketIoRoute(app fiber.Router) {
 		return true
 	})
 
-	io.Of("/test").OnConnection(func(socket *socketio.Socket) {
+	io.OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
 		socket.Join("demo")
 		io.To("demo").Emit("test", socket.Id+" join us room...", "server message")
@@ -53,11 +53,11 @@ func socketIoRoute(app fiber.Router) {
 			socket.Emit("chat message", event.Data[0])
 
 			if len(event.Data) > 2 {
-				log.Println(event.Data[2].(map[string]interface{}))
+				log.Println(socket.Nps, ": ", event.Data[2].(map[string]interface{}))
 			}
 
 			if event.Ack != nil {
-				event.Ack("hello", map[string]interface{}{
+				event.Ack("hello from name space root", map[string]interface{}{
 					"Test": "ok",
 				})
 			}
@@ -72,8 +72,22 @@ func socketIoRoute(app fiber.Router) {
 		})
 	})
 
-	io.OnConnection(func(socket *socketio.Socket) {
+	io.Of("/test").OnConnection(func(socket *socketio.Socket) {
 		println("connect", socket.Nps, socket.Id)
+
+		socket.On("chat message", func(event *socketio.EventPayload) {
+			socket.Emit("chat message", event.Data[0])
+
+			if len(event.Data) > 2 {
+				log.Println(socket.Nps, ": ", event.Data[2].(map[string]interface{}))
+			}
+
+			if event.Ack != nil {
+				event.Ack("hello from nps test", map[string]interface{}{
+					"Test": "ok",
+				})
+			}
+		})
 	})
 
 	app.Use("/", io.Middleware)
