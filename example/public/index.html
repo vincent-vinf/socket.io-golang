@@ -22,7 +22,11 @@
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
     <script>
-      var socket = io("/test", {
+      var socket = io("/", {
+        transports: ["websocket"],
+      });
+
+      var socket2 = io("/test", {
         transports: ["websocket"],
       });
       
@@ -36,10 +40,17 @@
           socket.emit('chat message', input.value + " with ack", "arg2", {"arg3": "test"}, function (status, obj) {
             console.log(status, obj);
             var item = document.createElement('li');
-            item.textContent = status;
+            item.textContent = "Root nps: " + status;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
           });
+          socket2.emit('chat message', input.value + " with ack socket 2", "arg2", {"arg3": "test"}, function (status, obj) {
+            console.log(status, obj);
+            var item = document.createElement('li');
+            item.textContent = "Test nps: " + status;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+          })
           socket.emit('chat message', input.value);
           input.value = '';
         }
@@ -47,7 +58,14 @@
     
       socket.on('chat message', function(msg) {
         var item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = "Root nps: " + msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      socket2.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = "Test nps: " + msg;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });

@@ -19,4 +19,4 @@ IF %func%==public (
     echo Done %func%
 )
 
-@REM make public v0.1.8
+@REM make public v0.1.9
