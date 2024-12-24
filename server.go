@@ -117,7 +117,6 @@ func (s *Io) read(ctx context.Context) {
 			}
 			dataJson := []interface{}{}
 			json.Unmarshal([]byte(payLoad.data.(string)), &dataJson)
-
 			if len(dataJson) > 0 {
 				if reflect.TypeOf(dataJson[0]).String() == "string" {
 					event := dataJson[0].(string)
@@ -253,10 +252,10 @@ func (s *Io) new() func(ctx *fiber.Ctx) error {
 						}
 
 						startPayload = endNamespace
-						if special1 != -1 {
-							startPayload = special1 - 1
-						} else if special2 != -1 {
+						if special2 != -1 {
 							startPayload = special2 - 1
+						} else if special1 != -1 {
+							startPayload = special1 - 1
 						}
 
 						if special3 != -1 && special2 != -1 && (special2-1 != special3) {
