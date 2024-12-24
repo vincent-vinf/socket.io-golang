@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	socketio "github.com/doquangtan/gofiber-socket.io"
 	"github.com/gofiber/fiber/v2"
 )
@@ -49,6 +51,10 @@ func socketIoRoute(app fiber.Router) {
 
 		socket.On("chat message", func(event *socketio.EventPayload) {
 			socket.Emit("chat message", event.Data[0])
+
+			if len(event.Data) > 2 {
+				log.Println(event.Data[2].(map[string]interface{}))
+			}
 
 			if event.Ack != nil {
 				event.Ack("hello", map[string]interface{}{
