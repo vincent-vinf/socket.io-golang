@@ -1,7 +1,6 @@
 # golang socket.io
 
 - socket.io is library an implementation of [Socket.IO](http://socket.io) in Golang, which is a realtime application framework.
-- It using with web-framework [Go Fiber](https://gofiber.io)
 - This library support socket.io-client version 3, 4 and only support websocket transport
 
 # Contents
@@ -29,6 +28,7 @@ and use `socketio` as the package name inside the code.
 ## Server
 ### Constructor
 #### socketio.New
+Using with fiber framework [Go Fiber](https://gofiber.io)
 ```go
 import (
 	socketio "github.com/doquangtan/socket.io/v4"
