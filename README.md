@@ -14,13 +14,13 @@
 Install the package with:
 
 ```bash
-go get github.com/doquangtan/socket.io/v4
+go get github.com/doquangtan/gofiber-socket.io/v4
 ```
 
 Import it with:
 
 ```go
-import "github.com/doquangtan/socket.io/v4"
+import "github.com/doquangtan/gofiber-socket.io/v4"
 ```
 
 and use `socketio` as the package name inside the code.
@@ -31,7 +31,7 @@ and use `socketio` as the package name inside the code.
 #### socketio.New
 ```go
 import (
-	socketio "github.com/doquangtan/socket.io/v4"
+	socketio "github.com/doquangtan/gofiber-socket.io/v4"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -209,4 +209,4 @@ socket.On("room 237", func(event *socketio.EventPayload) {
 
 # Example
 
-Please check more examples into folder in project for details. [Examples](https://github.com/doquangtan/socket.io/v4/tree/main/example)
+Please check more examples into folder in project for details. [Examples](https://github.com/doquangtan/gofiber-socket.io/v4/tree/main/example)
