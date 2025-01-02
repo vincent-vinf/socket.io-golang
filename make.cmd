@@ -8,7 +8,7 @@ IF %func%==public (
 
     git pull
 
-    git tag -a %version% -m "Releasing version v4.0.4"
+    git tag -a %version% -m "Releasing version v4.0.5"
 
     git push origin %version%
 
@@ -19,4 +19,4 @@ IF %func%==public (
     echo Done %func%
 )
 
-@REM make public v4.0.4
+@REM make public v4.0.5
