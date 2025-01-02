@@ -92,7 +92,7 @@ func (s *Io) To(name string) *Room {
 	return s.Of("/").To(name)
 }
 
-func (s *Io) Sockets(name string) []*Socket {
+func (s *Io) Sockets() []*Socket {
 	return s.Of("/").Sockets()
 }
 
