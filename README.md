@@ -209,4 +209,4 @@ socket.On("room 237", func(event *socketio.EventPayload) {
 
 # Example
 
-Please check more examples into folder in project for details. [Examples](https://github.com/doquangtan/socket.io/v4/tree/main/example)
+Please check more examples into folder in project for details. [Examples](https://github.com/doquangtan/socket.io-golang/v4/tree/main/example)
