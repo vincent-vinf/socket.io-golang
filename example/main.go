@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	socketio "github.com/doquangtan/gofiber-socket.io"
+	socketio "github.com/doquangtan/socket.io/v4"
 	"github.com/gofiber/fiber/v2"
 )
 

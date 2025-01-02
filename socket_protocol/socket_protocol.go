@@ -5,7 +5,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/doquangtan/gofiber-socket.io/engineio"
+	"github.com/doquangtan/socket.io/v4/engineio"
 )
 
 type PacketType int
