@@ -1,2 +1,1 @@
-*.js linguist-detectable=false
-*.js.map linguist-detectable=false
+client-dist/** linguist-detectable=false
