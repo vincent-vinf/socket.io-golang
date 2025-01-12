@@ -1,15 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 
 	socketio "github.com/doquangtan/socket.io/v4"
 	"github.com/gofiber/fiber/v2"
 )
 
-func socketIoRoute(app fiber.Router) {
-	io := socketio.New()
-
+func socketIoHandle(io *socketio.Io) {
 	io.OnAuthorization(func(params map[string]string) bool {
 		// auth, ok := params["Authorization"]
 		// if !ok {
@@ -89,18 +89,19 @@ func socketIoRoute(app fiber.Router) {
 			}
 		})
 	})
+}
 
+func socketIoRoute(app fiber.Router) {
+	io := socketio.New()
+	socketIoHandle(io)
 	app.Use("/", io.Middleware)
 	app.Route("/socket.io", io.Server)
 }
 
-func main() {
+func usingWithGoFiber() {
 	app := fiber.New(fiber.Config{})
-
 	app.Static("/", "./public")
-
 	app.Route("/", socketIoRoute)
-
 	app.Get("/test", func(c *fiber.Ctx) error {
 		io := c.Locals("io").(*socketio.Io)
 
@@ -114,6 +115,19 @@ func main() {
 
 		return c.SendStatus(200)
 	})
+	app.Listen(":3400")
+}
 
-	app.Listen(":3300")
+func httpServer() {
+	io := socketio.New()
+	socketIoHandle(io)
+	http.Handle("/socket.io/", io.HttpHandler())
+	http.Handle("/", http.FileServer(http.Dir("./public")))
+	fmt.Println("Server listenning on port 3300 ...")
+	fmt.Println(http.ListenAndServe(":3300", nil))
+}
+
+func main() {
+	httpServer()
+	// usingWithGoFiber()
 }
