@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	socketio "github.com/doquangtan/socket.io/v4"
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -91,36 +93,31 @@ func socketIoHandle(io *socketio.Io) {
 	})
 }
 
-func socketIoRoute(app fiber.Router) {
+func usingWithGoFiber() {
 	io := socketio.New()
 	socketIoHandle(io)
-	app.Use("/", io.Middleware)
-	app.Route("/socket.io", io.Server)
-}
 
-func usingWithGoFiber() {
 	app := fiber.New(fiber.Config{})
 	app.Static("/", "./public")
-	app.Route("/", socketIoRoute)
-	app.Get("/test", func(c *fiber.Ctx) error {
-		io := c.Locals("io").(*socketio.Io)
+	app.Use("/", io.Middleware)
+	app.Route("/socket.io", io.FiberRoute)
+	app.Listen(":3300")
+}
 
-		io.Emit("event", map[string]interface{}{
-			"Ok": 1,
-		})
+func usingWithGin() {
+	io := socketio.New()
+	socketIoHandle(io)
 
-		io.Of("/admin").Emit("event", map[string]interface{}{
-			"Ok": 1,
-		})
-
-		return c.SendStatus(200)
-	})
-	app.Listen(":3400")
+	router := gin.Default()
+	router.Use(static.Serve("/", static.LocalFile("./public", false)))
+	router.GET("/socket.io/", gin.WrapH(io.HttpHandler()))
+	router.Run(":3300")
 }
 
 func httpServer() {
 	io := socketio.New()
 	socketIoHandle(io)
+
 	http.Handle("/socket.io/", io.HttpHandler())
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 	fmt.Println("Server listenning on port 3300 ...")
@@ -128,6 +125,7 @@ func httpServer() {
 }
 
 func main() {
-	httpServer()
-	// usingWithGoFiber()
+	// httpServer()
+	usingWithGoFiber()
+	// usingWithGin()
 }

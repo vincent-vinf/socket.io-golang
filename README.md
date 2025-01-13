@@ -52,28 +52,45 @@ func main() {
 }
 ```
 
-Using with fiber framework [Go Fiber](https://gofiber.io)
+Using with web-framework [Gin](https://github.com/gin-gonic/gin)
 
 ```go
 import (
+	"github.com/gin-gonic/gin"
 	socketio "github.com/doquangtan/socket.io/v4"
-	"github.com/gofiber/fiber/v2"
 )
 
-func socketIoRoute(app fiber.Router) {
+func main() {
 	io := socketio.New()
 
 	io.OnConnection(func(socket *socketio.Socket) {
 		// ...
 	})
 
-	app.Use("/", io.Middleware)
-	app.Route("/socket.io", io.Server)
+	router := gin.Default()
+	router.GET("/socket.io/", gin.WrapH(io.HttpHandler()))
+	router.Run(":3300")
 }
+```
+
+Using with web-framework [Go Fiber](https://gofiber.io)
+
+```go
+import (
+	"github.com/gofiber/fiber/v2"
+	socketio "github.com/doquangtan/socket.io/v4"
+)
 
 func main() {
+	io := socketio.New()
+
+	io.OnConnection(func(socket *socketio.Socket) {
+		// ...
+	})
+
 	app := fiber.New(fiber.Config{})
-	app.Route("/", socketIoRoute)
+	app.Use("/", io.FiberMiddleware) //This middleware is to attach socketio to the context of fiber
+	app.Route("/socket.io", io.FiberRoute)
 	app.Listen(":3000")
 }
 ```

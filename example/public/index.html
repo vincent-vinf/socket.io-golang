@@ -71,10 +71,6 @@
 				transports: ["websocket"],
 			});
 
-			var socket2 = io("/test", {
-				transports: ["websocket"],
-			});
-
 			var messages = document.getElementById("messages");
 			var form = document.getElementById("form");
 			var input = document.getElementById("input");
@@ -95,19 +91,6 @@
 							window.scrollTo(0, document.body.scrollHeight);
 						}
 					);
-					socket2.emit(
-						"chat message",
-						input.value + " with ack socket 2",
-						"arg2",
-						{ arg3: "test" },
-						function (status, obj) {
-							console.log(status, obj);
-							var item = document.createElement("li");
-							item.textContent = "Test nps: " + status;
-							messages.appendChild(item);
-							window.scrollTo(0, document.body.scrollHeight);
-						}
-					);
 					socket.emit("chat message", input.value);
 					input.value = "";
 				}
@@ -119,14 +102,6 @@
 				messages.appendChild(item);
 				window.scrollTo(0, document.body.scrollHeight);
 			});
-
-			socket2.on("chat message", function (msg) {
-				var item = document.createElement("li");
-				item.textContent = "Test nps: " + msg;
-				messages.appendChild(item);
-				window.scrollTo(0, document.body.scrollHeight);
-			});
-
 			socket.on("connect", () => {
 				var item = document.createElement("li");
 				item.textContent = "Root nps: " + "Connected";
