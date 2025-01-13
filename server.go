@@ -85,6 +85,25 @@ func (s *Io) Middleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+func (s *Io) FiberRoute(router fiber.Router) {
+	router.Static("/", "../client-dist")
+	router.Use("/", func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+	router.Get("/", s.new())
+}
+
+func (s *Io) FiberMiddleware(c *fiber.Ctx) error {
+	if c.Locals("io") == nil {
+		c.Locals("io", s)
+	}
+	return c.Next()
+}
+
 func (s *Io) Close() {
 	s.close <- true
 }
