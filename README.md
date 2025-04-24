@@ -1,3 +1,5 @@
+<a href="https://buymeacoffee.com/johndylan1r" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 # golang socket.io
 
 - socket.io is library an implementation of [Socket.IO](http://socket.io) in Golang, which is a realtime application framework.
