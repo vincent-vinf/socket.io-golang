@@ -26,6 +26,12 @@ func (l *listeners) set(event string, callback eventCallback) {
 	l.Unlock()
 }
 
+func (l *listeners) clear(event string) {
+	l.Lock()
+	delete(l.list, event)
+	l.Unlock()
+}
+
 func (l *listeners) get(event string) []eventCallback {
 	l.RLock()
 	defer l.RUnlock()

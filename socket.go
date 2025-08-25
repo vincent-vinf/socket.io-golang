@@ -63,6 +63,11 @@ func (s *Socket) On(event string, fn eventCallback) {
 	s.listeners.set(event, fn)
 }
 
+// Off Removes the specified listener from the listener array for the event named eventName.
+func (s *Socket) Off(event string) {
+	s.listeners.clear(event)
+}
+
 func (s *Socket) Emit(event string, agrs ...interface{}) error {
 	c := s.Conn
 	if c == nil {
